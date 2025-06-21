@@ -9,7 +9,7 @@ def run_dspf(profile_sequence, spf, update_function, initialization):
     results = [] # List of tuples of (round, output_ranking), maybe also statistics as a third element of tuple
     for t, current_time_step_profile in enumerate(profile_sequence, 1):
         result = run_spf(current_time_step_profile, weights, spf)
-        update_weights()
+        weights = update_weights(weights, current_time_step_profile, update_function, result)
         results.append((t, result))
     return results
 
@@ -26,9 +26,35 @@ def run_spf(profile, weights, spf):
         return run_weighted_kemeny(profile, weights, True)
     elif spf == "rsd":
         return run_random_dictatorship(profile)
+    else:
+        raise NotImplementedError("Social preference function " + spf + " is unknown.")
 
-def update_weights():
-    return
+def update_weights(weights, profile, update_function, output_ranking, threshold=0):
+    if update_function == "constant":
+        return weights
+    elif update_function == "myopic-kt":
+        return update_myopic_kt(weights, profile, output_ranking)
+    elif update_function == "myopic-sq-kt":
+        return update_myopic_sq_kt(weights, profile, output_ranking)
+    elif update_function == "kt":
+        return update_kt(weights, profile, output_ranking)
+    elif update_function == "sq-kt":
+        return update_sq_kt(weights, profile, output_ranking)
+    elif update_function == "unit-cost":
+        return update_unit_cost(weights, profile, threshold, output_ranking)
+    elif update_function == "kt-reset":
+        return update_kt_reset(weights, profile, threshold, output_ranking)
+    elif update_function == "unit-cost-reset":
+        return update_unit_cost_reset(weights, profile, threshold, output_ranking)
+    elif update_function == "special-voter-kt":
+        pass
+    elif update_function == "perpetual-kt":
+        pass
+    elif update_function == "perpetual-nash":
+        pass
+    else:
+        raise NotImplementedError("Weight update function " + update_function + " is unknown.")
+    return weights
 
 def run_weighted_borda(profile, weights):
     num_candidates = len(profile[0])
@@ -70,6 +96,7 @@ def run_weighted_kemeny(profile, weights, squared_kemeny=False):
     return list(best_ranking)    
 
 def run_random_dictatorship(profile):
+    # rotational serial dictatorship could be tried as well, voters that have already won get the weight 0 until all voters become 0, then reset everything to 1
     return random.choice(profile)
 
 def kendall_tau_distance(r1, r2):
@@ -104,3 +131,50 @@ def squared_kendall_tau_distance(r1, r2):
     :param r2: Preference ranking 2
     """
     return kendall_tau_distance(r1, r2) ** 2
+
+def is_satisfied(threshold, voter_ranking, output_ranking):
+    if kendall_tau_distance(voter_ranking, output_ranking) <= threshold:
+        return True
+    return False
+
+def update_unit_cost(weights, profile, threshold, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        if not is_satisfied(threshold, voter_ranking, output_ranking):
+            weights[voter_index] += 1
+    return weights
+
+def update_kt_reset(weights, profile, threshold, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        if not is_satisfied(threshold, voter_ranking, output_ranking):
+            weights[voter_index] += kendall_tau_distance(voter_ranking, output_ranking)
+        else:
+            weights[voter_index] = 1
+    return weights
+
+def update_unit_cost_reset(weights, profile, threshold, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        if not is_satisfied(threshold, voter_ranking, output_ranking):
+            weights[voter_index] += 1
+        else:
+            weights[voter_index] = 1
+    return weights
+
+def update_myopic_kt(weights, profile, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        weights[voter_index] = kendall_tau_distance(voter_ranking, output_ranking)
+    return weights
+
+def update_myopic_sq_kt(weights, profile, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        weights[voter_index] = squared_kendall_tau_distance(voter_ranking, output_ranking)
+    return weights
+
+def update_kt(weights, profile, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        weights[voter_index] += kendall_tau_distance(voter_ranking, output_ranking)
+    return weights
+
+def update_sq_kt(weights, profile, output_ranking):
+    for voter_index, voter_ranking in enumerate(profile):
+        weights[voter_index] += squared_kendall_tau_distance(voter_ranking, output_ranking)
+    return weights
