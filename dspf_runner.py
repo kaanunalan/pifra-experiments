@@ -4,7 +4,7 @@ import numpy as np
 
 
 def run_dspf(profile_sequence, spf, update_function, initialization):
-    weights = initialize_weights(profile_sequence)
+    weights = initialize_weights(profile_sequence, initialization)
     print(profile_sequence)
     results = [] # List of tuples of (round, output_ranking), maybe also statistics as a third element of tuple
     for t, current_time_step_profile in enumerate(profile_sequence, 1):
@@ -113,15 +113,8 @@ def kendall_tau_distance(r1, r2):
     for i in range(n):
         for j in range(i + 1, n):
             a, b = r1[i], r1[j]
- #           print(a, b)
-  #          print("HERE")
-   #         print(index_r1[a], index_r1[b])
-    #        print(index_r2[a], index_r2[b])
             if (index_r1[a] < index_r1[b] and index_r2[a] > index_r2[b]):
-                #print("There")
                 distance += 1
-   # print(str(r1) + " and " + str(r2))
-    #print("KT: ", distance)
     return distance
 
 def squared_kendall_tau_distance(r1, r2):
@@ -131,6 +124,22 @@ def squared_kendall_tau_distance(r1, r2):
     :param r2: Preference ranking 2
     """
     return kendall_tau_distance(r1, r2) ** 2
+
+def spearman_footrule_distance(r1, r2):
+    """Compute the Spearman's footrule distance between two rankings.
+    
+    :param r1: Preference ranking 1 (list of candidate IDs)
+    :param r2: Preference ranking 2 (same candidates, permuted)
+    :return: Footrule distance (non-negative integer)
+    """
+    index_r1 = {c: i for i, c in enumerate(r1)}
+    index_r2 = {c: i for i, c in enumerate(r2)}
+    
+    distance = 0
+    for c in r1:
+        distance += abs(index_r1[c] - index_r2[c])
+    
+    return distance
 
 def is_satisfied(threshold, voter_ranking, output_ranking):
     if kendall_tau_distance(voter_ranking, output_ranking) <= threshold:
