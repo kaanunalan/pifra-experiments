@@ -1,2 +1,4 @@
 numpy==2.2.6
 prefsampling==0.1.24
+pytest==8.4.1
+
