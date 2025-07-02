@@ -19,15 +19,13 @@ def run_tspf(profile_sequence, spf, update_function, initialization, threshold):
     """
     weights = initialize_weights(profile_sequence, initialization)
     
-    results = [] # List of tuples of results
-    satisfaction_matrix = []
-    support_matrix = []
+    results = [] # List of output rankings
     for current_time_step_profile in profile_sequence:
         result = run_spf(current_time_step_profile, weights, spf)
-        satisfaction_matrix = compute_satisfaction(profile_sequence, result, threshold)
-        support_matrix = compute_support(profile_sequence, threshold)
         weights = update_weights(weights, current_time_step_profile, update_function, result, threshold)
         results.append(result)
+    satisfaction_matrix = compute_satisfaction(profile_sequence, results, threshold)
+    support_matrix = compute_support(profile_sequence, threshold)
     return results, satisfaction_matrix, support_matrix
 
 def initialize_weights(profile_sequence, initialization="equal"):
@@ -154,13 +152,13 @@ def run_weighted_random_serial_dictatorship(profile, weights):
 
 def update_unit_cost(weights, profile, threshold, output_ranking):
     for voter_index, voter_ranking in enumerate(profile):
-        if not is_satisfied(threshold, voter_ranking, output_ranking):
+        if not is_satisfied(voter_ranking, output_ranking, threshold):
             weights[voter_index] += 1
     return weights
 
 def update_kt_reset(weights, profile, threshold, output_ranking):
     for voter_index, voter_ranking in enumerate(profile):
-        if not is_satisfied(threshold, voter_ranking, output_ranking):
+        if not is_satisfied(voter_ranking, output_ranking, threshold):
             weights[voter_index] += kendall_tau_distance(voter_ranking, output_ranking)
         else:
             weights[voter_index] = 1
@@ -168,7 +166,7 @@ def update_kt_reset(weights, profile, threshold, output_ranking):
 
 def update_unit_cost_reset(weights, profile, threshold, output_ranking):
     for voter_index, voter_ranking in enumerate(profile):
-        if not is_satisfied(threshold, voter_ranking, output_ranking):
+        if not is_satisfied(voter_ranking, output_ranking, threshold):
             weights[voter_index] += 1
         else:
             weights[voter_index] = 1
@@ -196,11 +194,11 @@ def update_sq_kt(weights, profile, output_ranking):
 
 def update_perpetual_kt(weights, profile, threshold, output_ranking):
     for voter_index, voter_ranking in enumerate(profile):
-        if is_satisfied(threshold, voter_ranking, output_ranking):
+        if is_satisfied(voter_ranking, output_ranking, threshold):
             weights[voter_index] = weights[voter_index] / (weights[voter_index] + 1)
     return weights
 
-def compute_satisfaction(profile_sequence, output_ranking, threshold):
+def compute_satisfaction(profile_sequence, results, threshold):
     num_rounds = len(profile_sequence)
     num_voters = len(profile_sequence[0])
     
@@ -213,15 +211,24 @@ def compute_satisfaction(profile_sequence, output_ranking, threshold):
 
     for i, profile in enumerate(profile_sequence):
         for j, voter in enumerate(profile):
-            if is_satisfied(voter, output_ranking, threshold):
+            if is_satisfied(voter, results[i], threshold):
                 satisfaction_matrix[i][j] = 1
     return satisfaction_matrix
 
 def compute_support(profile_sequence, threshold):
+    num_rounds = len(profile_sequence)
+    num_voters = len(profile_sequence[0])
+    
     support_matrix = []
+    for i in range(num_rounds):
+        row = []
+        for j in range(num_voters):
+            row.append(0)
+        support_matrix.append(row)
+
     for i, profile in enumerate(profile_sequence):
         for j, voter in enumerate(profile):
-            for other_voters in enumerate(profile):
+            for other_voters in profile:
                 if is_satisfied(voter, other_voters, threshold):
                     support_matrix[i][j] += 1
     return support_matrix
