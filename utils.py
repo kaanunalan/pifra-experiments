@@ -59,4 +59,3 @@ def is_satisfied(voter_ranking, output_ranking, threshold=0):
     if kendall_tau_distance(voter_ranking, output_ranking) <= threshold:
         return True
     return False
-
