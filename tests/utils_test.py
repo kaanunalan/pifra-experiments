@@ -34,11 +34,11 @@ def test_kendall_one_swap(identity_ranking, swap_first_two):
     # only pair (0,1) inverted => distance 1
     assert kendall_tau_distance(identity_ranking, swap_first_two) == 1
 
-def test_kendall_commutes(identity_ranking, swap_first_two):
+def test_kendall_commutative(identity_ranking, swap_first_two):
     # symmetry: d(r1,r2) == d(r2,r1)
-    d12 = kendall_tau_distance(identity_ranking, swap_first_two)
-    d21 = kendall_tau_distance(swap_first_two, identity_ranking)
-    assert d12 == d21
+    d1 = kendall_tau_distance(identity_ranking, swap_first_two)
+    d2 = kendall_tau_distance(swap_first_two, identity_ranking)
+    assert d1 == d2
 
 # ----------------------------
 # Squared Kendall tau distance tests
