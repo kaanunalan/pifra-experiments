@@ -1,9 +1,8 @@
 import argparse
 import sys
 
-from experiments.data_generator import prepare_profiles
-from dspf_runner import run_dspf
-from experiments.result_processor import process_results
+from data_generator import prepare_profiles
+from tspf_runner import run_dspf
 
 
 def run_pifra(files, spf, update_function, initialization, threshold):
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog=sys.argv[0],
         usage="%(prog)s [data.txt ...] --spf {kemeny,sq-kemeny,borda} "
-              "--update {equal-weights,custom} --initialization {equal,custom}",
+                "--update {equal-weights,custom} --initialization {equal,custom}",
         description="Run a social choice algorithm with specified settings."
     )
 
@@ -42,10 +41,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Now args.spf, args.update, args.initialization, and args.files are available
-    print("SPF:", args.spf)
-    print("Update function:", args.update)
-    print("Initialization method:", args.initialization)
-    print("Files:", [f.name for f in args.files])
+    # print("SPF:", args.spf)
+    # print("Update function:", args.update)
+    # print("Initialization method:", args.initialization)
+    # print("Files:", [f.name for f in args.files])
 
     run_pifra(args.files, args.spf, args.update, args.initialization)
 
