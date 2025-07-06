@@ -1,16 +1,16 @@
 import argparse
 import sys
 
-from data_generator import prepare_profiles
-from tspf_runner import run_dspf
+from tspf_runner import run_tspf
 
 
 def run_pifra(files, spf, update_function, initialization, threshold):
-    results = [] # List of tuples of (profile, result)
-    profile_sequence_list = prepare_profiles()
+    results = [] # List of tuples of (profile, (result, satisfaction_matrix, support_matrix))
+    profile_sequence_list = [[[[1, 0, 2, 3, 4], [2, 1, 0, 3, 4], [0, 2, 1, 3, 4]]]]  # Placeholder for profile sequences
     
     for profile_sequence in profile_sequence_list:
-        results.append((profile_sequence, run_dspf(profile_sequence, spf, update_function, initialization, threshold)))
+        print(profile_sequence)
+        results.append((profile_sequence, run_tspf(profile_sequence, spf, update_function, initialization, threshold)))
     
     print(results)
     #process_results(results)
@@ -46,5 +46,5 @@ if __name__ == "__main__":
     # print("Initialization method:", args.initialization)
     # print("Files:", [f.name for f in args.files])
 
-    run_pifra(args.files, args.spf, args.update, args.initialization)
+    run_pifra(args.files, args.spf, args.update, args.initialization, 0)
 
