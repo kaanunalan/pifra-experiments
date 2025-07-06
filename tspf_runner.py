@@ -45,7 +45,7 @@ def initialize_weights(profile_sequence, initialization="equal"):
         three_quarter_total_weight = len(profile_sequence[0]) - 1
         weights = np.ones(num_voters_round_one)
         weights[len(profile_sequence[0]) - 1] = math.ceil(three_quarter_total_weight / 3)
-    return weights
+        return weights
 
 def run_spf(profile, weights, spf):
     """Runs the specified social preference function.
@@ -104,24 +104,27 @@ def update_weights(weights, profile, update_function, output_ranking, threshold=
         return update_perpetual_kt(weights, profile, threshold, output_ranking)
     elif update_function == "perpetual-nash":
         pass
-    else:
-        raise NotImplementedError("Weight update function " + update_function + " is unknown.")
+    elif update_function:
+        raise NotImplementedError("Weight update function " + str(update_function) + " is unknown.")
     return weights
 
 def run_weighted_borda(profile, weights):
     num_candidates = len(profile[0])
     
     # Initialize Borda scores
-    scores = np.ones(num_candidates, dtype=int)
-    
+    scores = np.zeros(num_candidates, dtype=int)
+
     # For each voter, assign Borda scores (m-1 to 0)
     for voter_index, ranking in enumerate(profile):
         weight = weights[voter_index]
         for i, candidate in enumerate(ranking):
             scores[candidate] += weight * (num_candidates - 1 - i)
-    
-    # Create output ranking: sort candidates by descending score
-    output_ranking = list(np.argsort(-scores))
+
+    # Tiebreaker: use the last voter's ranking
+    tiebreaker = {candidate: rank for rank, candidate in enumerate(profile[len(profile)-1])}
+
+    # Sort candidates by descending score, then by tiebreaker (ascending ranks)
+    output_ranking = sorted(range(num_candidates), key=lambda c: (scores[c], -tiebreaker[c]), reverse=True)
 
     return output_ranking
 
@@ -137,6 +140,18 @@ def run_weighted_kemeny(profile, weights, squared_kemeny=False):
             total_distance = sum((weights[voter_index] * squared_kendall_tau_distance(guess_ranking, voter_ranking)) for voter_index, voter_ranking in enumerate(profile))
         else:
             total_distance = sum((weights[voter_index] * kendall_tau_distance(guess_ranking, voter_ranking)) for voter_index, voter_ranking in enumerate(profile))
+
+        if total_distance == min_total_distance:
+            num_voters = len(profile)
+            special_voter = profile[num_voters-1]
+            if squared_kemeny:
+                if squared_kendall_tau_distance(special_voter, guess_ranking) <= squared_kendall_tau_distance(special_voter, best_ranking):
+                    total_distance = min_total_distance
+                    best_ranking = guess_ranking
+            else:
+                if kendall_tau_distance(special_voter, guess_ranking) <= kendall_tau_distance(special_voter, best_ranking):
+                    total_distance = min_total_distance
+                    best_ranking = guess_ranking
         if total_distance < min_total_distance:
             min_total_distance = total_distance
             best_ranking = guess_ranking

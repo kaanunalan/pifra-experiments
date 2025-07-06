@@ -22,6 +22,23 @@ def profile_1():
     return [[0, 1, 2], [1, 0, 2], [1, 0, 2], [2, 0, 1], [2, 1, 0]]
 
 @pytest.fixture
+def profile_3():
+    return [[1, 0, 2, 3, 4], [2, 1, 0, 3, 4], [0, 2, 1, 4, 3]]
+
+@pytest.fixture
+def profile_4():
+    return [[1, 0, 2, 3, 4], [0, 2, 1, 4, 3], [2, 1, 0, 3, 4]]
+
+@pytest.fixture
+def profile_5():
+    return [[1, 0, 2, 3, 4], [2, 1, 0, 3, 4], [0, 2, 1, 3, 4]]
+
+@pytest.fixture
+def profile_6():
+    return [[1, 0, 2, 3, 4], [0, 2, 1, 3, 4], [2, 1, 0, 3, 4]]
+
+
+@pytest.fixture
 def weights_equal():
     return np.ones(5)
 
@@ -47,11 +64,18 @@ def test_run_weighted_borda(profile_1, weights_equal):
     out = run_weighted_borda(profile_1, weights_equal)
     assert out == [1, 0, 2]
 
-def test_run_weighted_borda_custom(profile_1):
+def test_run_weighted_borda_2(profile_1):
     w = np.array([1, 1, 1, 3, 1])
     out = run_weighted_borda(profile_1, w)
     assert out == [2, 0, 1]
 
+def test_run_weighted_borda_3(profile_3, weights_equal):
+    out = run_weighted_borda(profile_3, weights_equal)
+    assert out == [0, 2, 1, 3, 4]
+
+def test_run_weighted_borda_4(profile_4, weights_equal):
+    out = run_weighted_borda(profile_4, weights_equal)
+    assert out == [2, 1, 0, 3, 4]
 # ----------------------------
 #  Weighted Kemeny tests
 # ----------------------------
@@ -85,6 +109,22 @@ def test_run_weighted_sq_kemeny_3():
     profile_2 = [[1, 0, 2], [1, 0, 2], [0, 2, 1]]
     out = run_weighted_kemeny(profile_2, w, squared_kemeny=True)
     assert out == [0, 1, 2]
+
+def test_run_weighted_kemeny_4(profile_5, weights_equal):
+    out = run_weighted_kemeny(profile_5, weights_equal, squared_kemeny=False)
+    assert out == [0, 2, 1, 3, 4]
+
+def test_run_weighted_sq_kemeny_4(profile_5, weights_equal):
+    out = run_weighted_kemeny(profile_5, weights_equal, squared_kemeny=True)
+    assert out == [0, 2, 1, 3, 4]
+
+def test_run_weighted_kemeny_5(profile_6, weights_equal):
+    out = run_weighted_kemeny(profile_6, weights_equal, squared_kemeny=False)
+    assert out == [2, 1, 0, 3, 4]
+
+def test_run_weighted_sq_kemeny_5(profile_6, weights_equal):
+    out = run_weighted_kemeny(profile_6, weights_equal, squared_kemeny=True)
+    assert out == [2, 1, 0, 3, 4]
 
 # ----------------------------
 #  Random serial dictatorship
