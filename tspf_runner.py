@@ -246,4 +246,5 @@ def compute_support(profile_sequence, threshold):
             for other_voters in profile:
                 if is_satisfied(voter, other_voters, threshold):
                     support_matrix[i][j] += 1
+            support_matrix[i][j] /= len(profile)  # Normalize support by the number of voters in the profile
     return support_matrix
