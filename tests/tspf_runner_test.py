@@ -138,8 +138,14 @@ def test_run_weighted_random_serial_dictatorship(profile_1):
     out = run_weighted_random_serial_dictatorship(profile_1, [0,0,1,0,0])
     assert out == [1, 0, 2]
 
-def test_compute_satisfaction_all_true():
+def test_compute_satisfaction():
     seq = [[[0,1],[1,0]], [[0,1],[1,0]]]
     out = [ [0,1] , [0,1] ] 
     mat = compute_satisfaction(seq, out, threshold=0)
     assert mat == [[1,0],[1,0]]
+
+def test_compute_support():
+    seq = [[[0,1],[1,0]], [[0,1],[1,0]]]
+    out = [ [0,1] , [0,1] ] 
+    mat = compute_satisfaction(seq, out, threshold=0)
+    assert mat == [[1, 0], [1, 0]]
