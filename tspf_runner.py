@@ -159,9 +159,11 @@ def run_weighted_kemeny(profile, weights, squared_kemeny=False):
     return list(best_ranking)    
 
 def run_random_serial_dictatorship(profile):
+    random.seed(33)
     return random.choice(profile)
 
 def run_weighted_random_serial_dictatorship(profile, weights):
+    random.seed(33)
     return random.choices(profile, weights=weights, k=1)[0]
 
 
