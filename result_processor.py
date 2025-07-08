@@ -5,24 +5,25 @@ from utils import kendall_tau_distance, spearman_footrule_distance
 
 
 def analyze_results(profile_sequence, results, satisfaction_matrix, support_matrix):
-    print("Perpetual Lower Quota Compliance:")
-    print(get_perpetual_lower_quota_compliance(satisfaction_matrix, support_matrix))
-    print()
-    print("Gini Influence Coefficient:")
-    print(get_gini_influence_coefficient(profile_sequence, results, satisfaction_matrix))
-    print()
-    print("Average Spearman Footrule Distance:")
-    print(get_avg_spearman_footrule_distance(profile_sequence, results))
-    print()
-    print("Average KT Distance:")
-    print(get_avg_kt_distance(profile_sequence, results))
-    print()
-    print("Standard Deviation of KT Distance:")
-    print(get_standard_deviation_kt(profile_sequence, results))
-    print()
-    print("Get Egalitarian KT Distance:")
-    print(get_egalitarian_kt_distance(profile_sequence, results))
-    print()
+    pass
+    #print("Perpetual Lower Quota Compliance:")
+    #print(get_perpetual_lower_quota_compliance(satisfaction_matrix, support_matrix))
+    #print()
+    #print("Gini Influence Coefficient:")
+    #print(get_gini_influence_coefficient(profile_sequence, results, satisfaction_matrix))
+    #print()
+    #print("Average Spearman Footrule Distance:")
+    #print(get_avg_spearman_footrule_distance(profile_sequence, results))
+    #print()
+    #print("Average KT Distance:")
+    #print(get_avg_kt_distance(profile_sequence, results))
+    #print()
+    #print("Standard Deviation of KT Distance:")
+    #print(get_standard_deviation_kt(profile_sequence, results))
+    #print()
+    #print("Get Egalitarian KT Distance:")
+    #print(get_egalitarian_kt_distance(profile_sequence, results))
+    #print()
 
 def get_perpetual_lower_quota_compliance(satisfaction_matrix, support_matrix):
     num_voters = len(satisfaction_matrix[0])
@@ -53,7 +54,7 @@ def get_gini_influence_coefficient(profile_sequence, result_sequence, sat_matrix
     else:
         return 0
     
-def get_voter_influence(profile_sequence, result_sequence,  voter_index, sat_matrix,):
+def get_voter_influence(profile_sequence, result_sequence,  voter_index, sat_matrix):
     num_rounds = len(result_sequence)
     
     infl_counter = 0

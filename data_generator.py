@@ -4,27 +4,20 @@ from prefsampling.core.euclidean import EuclideanSpace
 
 def generate_profile_sequence_list():
     """
-    Generates data to be used in the experiments.
+    Generates data (list of profile sequences) to be used in the experiments.
 
     :return: List of preference profiles.
     """
     profiles_list = []
-    profiles_list.append(generate_euclidean_profile_sequence())
+    for i in range(5):
+        profiles_list.append(generate_euclidean_profile_sequence(i * 10 + 1))
     return profiles_list
 
-def generate_euclidean_profile_sequence():
+def generate_euclidean_profile_sequence(start_seed):
     profile_sequence = []
 
-    profile_sequence.append(generate_euclidean(30, 5, 2, 1))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 2))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 3))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 4))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 5))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 6))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 7))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 8))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 9))
-    profile_sequence.append(generate_euclidean(30, 5, 2, 10))
+    for seed in range(start_seed, start_seed + 10):
+        profile_sequence.append(generate_euclidean(50, 5, 2, seed))
 
     return profile_sequence
 
