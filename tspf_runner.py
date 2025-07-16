@@ -69,7 +69,7 @@ def run_spf(profile, weights, spf):
     elif spf == "weighted-rsd":
         return run_weighted_random_serial_dictatorship(profile, weights)
     else:
-        raise NotImplementedError("Social preference function " + spf + " is unknown.")
+        raise NotImplementedError("Social preference function " + str(spf) + " is unknown.")
 
 def update_weights(weights, profile, update_function, output_ranking, threshold=0):
     """Updates the weights.
