@@ -9,14 +9,14 @@ def generate_profile_sequence_list():
     :return: List of preference profiles.
     """
     profiles_list = []
-    for i in range(5):
-        profiles_list.append(generate_euclidean_profile_sequence(i * 10 + 1))
+    for i in range(30):
+        profiles_list.append(generate_euclidean_profile_sequence(i * 30 + 1))
     return profiles_list
 
 def generate_euclidean_profile_sequence(start_seed):
     profile_sequence = []
 
-    for seed in range(start_seed, start_seed + 10):
+    for seed in range(start_seed, start_seed + 30):
         profile_sequence.append(generate_euclidean(50, 5, 2, seed))
 
     return profile_sequence
