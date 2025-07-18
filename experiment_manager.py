@@ -17,8 +17,8 @@ def start_experiment(spf, update_function, initialization, threshold, profile_se
         all_results.append(results)
         all_satisfaction.append(satisfaction_matrix)
         all_support.append(support_matrix)
-
-    # This can be moved to a separate function
+        
+    # Calculate metrics for all instances (average over all profile sequences)
     sum_lower_quota = 0
     sum_gini = 0
     sum_avg_footrule = 0

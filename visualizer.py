@@ -69,6 +69,7 @@ def visualize_all(spf_list, update_functions, lower_quota_values, gini_values, a
 def draw_metric_all(metric_values, spf_list, update_functions, init_to_plot, threshold_to_plot, file_name, metric_name="Metric Value"):
     """
     Plots a generic metric for all update functions and SPFs for a given initialization and threshold.
+    It is based on average of all profiles' outcomes.
     
     :param metric_values: list of (spf, update_func, init, threshold, metric)
     :param spf_list: list of SPFs
@@ -161,3 +162,46 @@ def draw_average_sq_kt_all(avg_sq_kt_values, spf_list, update_functions, init_to
         avg_sq_kt_values, spf_list, update_functions, init_to_plot, threshold_to_plot,
         file_name, metric_name="Average Squared KT Distance"
     )
+
+def draw_gini_boxplot_all(gini_values, spf_list, update_functions, init_to_plot, threshold_to_plot, file_name):
+    """
+    Draws a boxplot for Gini influence coefficient for all update functions and SPFs for a given initialization and threshold.
+    Each box shows the distribution of Gini values across all profiles (not averaged).
+    
+    :param gini_values: list of (spf, update_func, init, threshold, gini) for each profile
+    :param spf_list: list of SPFs
+    :param update_functions: list of update functions
+    :param init_to_plot: given weight initialization (e.g., 'equal')
+    :param threshold_to_plot: given satisfaction threshold (e.g., 3)
+    :param file_name: Name of the file to save the plot
+    """
+    plt.figure(figsize=(12, 6))
+    box_width = 0.15
+    offsets = [i * box_width for i in range(len(spf_list))]
+    x = range(len(update_functions))
+    for idx, spf in enumerate(spf_list):
+        data = []
+        for update_func in update_functions:
+            # Collect all gini values for this (spf, update_func, init, threshold)
+            values = [gini for (s, u, init, threshold, gini) in gini_values
+                      if s == spf and u == update_func and init == init_to_plot and threshold == threshold_to_plot]
+            data.append(values)
+        # Offset boxes for each SPF
+        positions = [i + offsets[idx] for i in x]
+        plt.boxplot(data, positions=positions, widths=box_width, patch_artist=True,
+                    boxprops=dict(facecolor=f'C{idx}', alpha=0.5),
+                    medianprops=dict(color='black'),
+                    showfliers=True)
+    # Set x-ticks in the center of each group
+    plt.xticks([i + offsets[len(offsets)//2] for i in x], update_functions, rotation=45)
+    plt.xlabel('Update Function')
+    plt.ylabel('Gini Influence Coefficient')
+    plt.title(f'Gini Influence Coefficient Distribution (init={init_to_plot}, threshold={threshold_to_plot})')
+    # Legend
+    for idx, spf in enumerate(spf_list):
+        plt.plot([], [], color=f'C{idx}', label=spf)
+    plt.legend(title='SPF')
+    plt.tight_layout()
+    plt.savefig(file_name)
+    plt.close()
+    print(f'Boxplot saved as {file_name}')
