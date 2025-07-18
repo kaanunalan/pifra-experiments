@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-from utils import kendall_tau_distance, spearman_footrule_distance
+from utils import kendall_tau_distance, spearman_footrule_distance, squared_kendall_tau_distance
 
 
 def analyze_results(profile_sequence, results, satisfaction_matrix, support_matrix):
@@ -39,6 +39,30 @@ def get_perpetual_lower_quota_compliance(satisfaction_matrix, support_matrix):
                 compl_counter += 1
 
     return compl_counter / (num_voters * num_rounds)
+
+def get_perpetual_lower_quota_compliance_ratio_special_voter(satisfaction_matrix, support_matrix):
+    num_voters = len(satisfaction_matrix[0])
+    num_rounds = len(satisfaction_matrix)
+    
+    compl_counter = 0
+    compl_counter_special_voter = 0
+    for t in range(num_rounds):
+        for v in range(num_voters-1): # Do not include the special voter
+            sat = sum(satisfaction_matrix[round_ind][v] for round_ind in range(t))
+            quota = sum(support_matrix[round_ind][v] for round_ind in range(t))
+
+            if sat >= math.floor(quota):
+                compl_counter += 1
+        
+        sat_special_voter = sum(satisfaction_matrix[round_ind][num_voters - 1] for round_ind in range(num_rounds))
+        quota_special_voter = sum(support_matrix[round_ind][num_voters - 1] for round_ind in range(num_rounds))
+        if sat_special_voter >= math.floor(quota_special_voter):
+            compl_counter_special_voter += 1
+
+    perpetual_lower_quota_excluding_special_voter = compl_counter / ((num_voters - 1) * num_rounds)
+    perpetual_lower_quota_special_voter = compl_counter_special_voter / num_rounds
+   
+    return perpetual_lower_quota_special_voter / perpetual_lower_quota_excluding_special_voter if perpetual_lower_quota_excluding_special_voter != 0 else -1
 
 def get_gini_influence_coefficient(profile_sequence, result_sequence, sat_matrix):
     num_voters = len(profile_sequence[0])
@@ -86,7 +110,7 @@ def get_avg_spearman_footrule_distance(profile_sequence, result_sequence):
         profile = profile_sequence[t]
         avg_distance_this_round = sum(spearman_footrule_distance(output, voter) for voter in profile) / num_voters
         total_distance += avg_distance_this_round
-    return total_distance / num_voters
+    return total_distance / len(result_sequence)
 
 def get_avg_kt_distance(profile_sequence, result_sequence):
     num_voters = len(profile_sequence[0])
@@ -97,10 +121,21 @@ def get_avg_kt_distance(profile_sequence, result_sequence):
         profile = profile_sequence[t]
         avg_distance_this_round = sum(kendall_tau_distance(output, voter) for voter in profile) / num_voters
         total_distance += avg_distance_this_round
-    return total_distance / num_voters
+    return total_distance / len(result_sequence)
+
+def get_avg_sq_kt_distance(profile_sequence, result_sequence):
+    num_voters = len(profile_sequence[0])
+    total_distance = 0.0
+
+    for t in range(len(result_sequence)):
+        output = result_sequence[t]
+        profile = profile_sequence[t]
+        avg_distance_this_round = sum(squared_kendall_tau_distance(output, voter) for voter in profile) / num_voters
+        total_distance += avg_distance_this_round
+    return total_distance / len(result_sequence)
 
 def get_egalitarian_kt_distance(profile_sequence, result_sequence):
-    return np.min(get_avg_voter_distances(profile_sequence, result_sequence))
+    return np.max(get_avg_voter_distances(profile_sequence, result_sequence))
 
 def get_standard_deviation_kt(profile_sequence, result_sequence):
     return np.std(get_avg_voter_distances(profile_sequence, result_sequence))
