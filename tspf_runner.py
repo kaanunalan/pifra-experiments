@@ -98,8 +98,10 @@ def update_weights(weights, profile, update_function, output_ranking, threshold=
         return update_kt_reset(weights, profile, threshold, output_ranking)
     elif update_function == "unit-cost-reset":
         return update_unit_cost_reset(weights, profile, threshold, output_ranking)
-    elif update_function == "special-voter-kt":
-        pass
+    elif update_function == "kt-special-voter":
+        return update_special_voter_kt(weights, profile, output_ranking)
+    elif update_function == "myopic-kt-special-voter":
+        return update_special_voter_myopic_kt(weights, profile, output_ranking)
     elif update_function == "perpetual-kt":
         return update_perpetual_kt(weights, profile, threshold, output_ranking)
     elif update_function == "perpetual-nash":
@@ -215,7 +217,33 @@ def update_perpetual_kt(weights, profile, threshold, output_ranking):
             weights[voter_index] = weights[voter_index] / (weights[voter_index] + 1)
     return weights
 
+def update_special_voter_myopic_kt(weights, profile, output_ranking):
+    """Updates weights with myopic update function. Special voter gets always the maximum weight."""
+    max_kt = 0
+    for voter_index, voter_ranking in enumerate(profile):
+        kt = kendall_tau_distance(voter_ranking, output_ranking)
+        weights[voter_index] = kt
+        if kt > max_kt:
+            max_kt = kt
+    weights[-1] = max_kt
+    return weights
+
+def update_special_voter_kt(weights, profile, output_ranking):
+    """Updates weights with KT-based update function. Special voter gets always the maximum weight."""
+    sum_kt = 0
+    for voter_index, voter_ranking in enumerate(profile):
+        kt = kendall_tau_distance(voter_ranking, output_ranking)
+        weights[voter_index] += kt
+        sum_kt += kt
+    weights[-1] += sum_kt
+    return weights
+
 def compute_satisfaction(profile_sequence, results, threshold):
+    """Computes the satisfaction matrix for the given profile sequence and results.
+    Satisfaction matrix is a 2D list where each row corresponds to a round and each column to a voter.
+    A value of 1 indicates that the voter is satisfied with the output ranking, while a value of 0 
+    indicates dissatisfaction.
+    """
     num_rounds = len(profile_sequence)
     num_voters = len(profile_sequence[0])
     
@@ -230,9 +258,16 @@ def compute_satisfaction(profile_sequence, results, threshold):
         for j, voter in enumerate(profile):
             if is_satisfied(voter, results[i], threshold):
                 satisfaction_matrix[i][j] = 1
+
     return satisfaction_matrix
 
 def compute_support(profile_sequence, threshold):
+    """Computes the support matrix for the given profile sequence and threshold.
+    Support matrix is a 2D list where each row corresponds to a round and each column to a voter.
+    Each value indicates the proportion of voters in the profile that support the output ranking.
+    A value of 1 indicates that all voters support the output ranking, while a value of 0 
+    indicates no support.
+    """
     num_rounds = len(profile_sequence)
     num_voters = len(profile_sequence[0])
     
@@ -249,4 +284,5 @@ def compute_support(profile_sequence, threshold):
                 if is_satisfied(voter, other_voters, threshold):
                     support_matrix[i][j] += 1
             support_matrix[i][j] /= len(profile)  # Normalize support by the number of voters in the profile
+    
     return support_matrix
