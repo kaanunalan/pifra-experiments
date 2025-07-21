@@ -3,7 +3,7 @@ from data_generator import generate_profile_sequence_list
 from tspf_runner import run_tspf
 from result_processor import get_avg_kt_distance, get_avg_spearman_footrule_distance, get_avg_sq_kt_distance, get_egalitarian_kt_distance, get_gini_influence_coefficient, get_perpetual_lower_quota_compliance, get_perpetual_lower_quota_compliance_ratio_special_voter, get_standard_deviation_kt
 from visualizer import visualize_all
-
+import csv
 
 def start_experiment(spf, update_function, initialization, threshold, profile_sequence_list):
     all_results = []         # list of result ranking lists per instance
@@ -66,6 +66,14 @@ if __name__ == "__main__":
     thresholds = [0, 3, 7] # 10 is maximal KT distance for 5 alternatives
     profile_sequence_list = generate_profile_sequence_list()
 
+    # Write profile sequences to a file for reproducibility
+    with open("profile_sequences.txt", 'w') as f:
+        for i, profile_sequence in enumerate(profile_sequence_list):
+            f.write(f"Profile Sequence {i+1}:\n")
+            for profile in profile_sequence:
+                f.write(f"{profile}\n")
+            f.write("\n")
+
     # Store metrics for each configuration
     gini_values = []
     lower_quota_values = []
@@ -92,3 +100,34 @@ if __name__ == "__main__":
         avg_footrule_values, avg_kt_values, std_kt_values, egalitarian_kt_values, 
         lower_quota_ratios_special_voter, avg_sq_kt_values
     )
+
+    # Save results to a csv file for each metric
+    with open("experiment_results.csv", 'w', newline='') as csvfile:
+        fieldnames = ["SPF", "Update Function", "Initialization", "Threshold",
+                      "Avg Lower Quota", "Avg Gini", "Avg Footrule",
+                      "Avg KT", "Std KT", "Egalitarian KT",
+                      "LQ Ratio Special Voter", "Avg SQ KT"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        
+        for (spf, update_func, init, threshold), lower_quota, gini, footrule, kt, std_kt, egalitarian_kt, lq_ratio_special_voter, avg_sq_kt in zip(
+            product(spf_list, update_functions, initializations, thresholds),
+            lower_quota_values, gini_values, avg_footrule_values,
+            avg_kt_values, std_kt_values, egalitarian_kt_values,
+            lower_quota_ratios_special_voter, avg_sq_kt_values
+        ):
+            writer.writerow({
+                'SPF': spf,
+                'Update Function': update_func,
+                'Initialization': init,
+                'Threshold': threshold,
+                'Avg Lower Quota': lower_quota,
+                'Avg Gini': gini,
+                'Avg Footrule': footrule,
+                'Avg KT': kt,
+                'Std KT': std_kt,
+                'Egalitarian KT': egalitarian_kt,
+                'LQ Ratio Special Voter': lq_ratio_special_voter,
+                'Avg SQ KT': avg_sq_kt
+            })
+    
