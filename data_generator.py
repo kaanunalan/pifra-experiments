@@ -27,8 +27,8 @@ def generate_euclidean(num_voters, num_candidates, num_dimensions, seed):
         num_voters=num_voters,
         num_candidates=num_candidates,
         num_dimensions=num_dimensions,
-        voters_positions=EuclideanSpace.UNIFORM_BALL,
-        candidates_positions=EuclideanSpace.UNIFORM_BALL,
+        voters_positions=EuclideanSpace.UNIFORM_CUBE,
+        candidates_positions=EuclideanSpace.UNIFORM_CUBE,
         seed=seed
     )
     
