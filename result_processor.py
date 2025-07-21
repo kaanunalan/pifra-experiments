@@ -46,6 +46,7 @@ def get_perpetual_lower_quota_compliance_ratio_special_voter(satisfaction_matrix
     
     compl_counter = 0
     compl_counter_special_voter = 0
+    sat_counter = 0
     for t in range(num_rounds):
         for v in range(num_voters-1): # Do not include the special voter
             sat = sum(satisfaction_matrix[round_ind][v] for round_ind in range(t))
@@ -54,15 +55,16 @@ def get_perpetual_lower_quota_compliance_ratio_special_voter(satisfaction_matrix
             if sat >= math.floor(quota):
                 compl_counter += 1
         
-        sat_special_voter = sum(satisfaction_matrix[round_ind][num_voters - 1] for round_ind in range(num_rounds))
-        quota_special_voter = sum(support_matrix[round_ind][num_voters - 1] for round_ind in range(num_rounds))
+        sat_special_voter = sum(satisfaction_matrix[round_ind][num_voters - 1] for round_ind in range(t))
+        quota_special_voter = sum(support_matrix[round_ind][num_voters - 1] for round_ind in range(t))
+        sat_counter += sat_special_voter
         if sat_special_voter >= math.floor(quota_special_voter):
             compl_counter_special_voter += 1
 
-    perpetual_lower_quota_excluding_special_voter = compl_counter / ((num_voters - 1) * num_rounds)
+    #perpetual_lower_quota_excluding_special_voter = compl_counter / ((num_voters - 1) * num_rounds)
     perpetual_lower_quota_special_voter = compl_counter_special_voter / num_rounds
-   
-    return perpetual_lower_quota_special_voter / perpetual_lower_quota_excluding_special_voter if perpetual_lower_quota_excluding_special_voter != 0 else -1
+    
+    return sat_counter #perpetual_lower_quota_special_voter #/ perpetual_lower_quota_excluding_special_voter if perpetual_lower_quota_excluding_special_voter != 0 else -1
 
 def get_gini_influence_coefficient(profile_sequence, result_sequence, sat_matrix):
     num_voters = len(profile_sequence[0])
@@ -78,13 +80,13 @@ def get_gini_influence_coefficient(profile_sequence, result_sequence, sat_matrix
     else:
         return 0
     
-def get_voter_influence(profile_sequence, result_sequence,  voter_index, sat_matrix):
+def get_voter_influence(profile_sequence, result_sequence, voter_index, sat_matrix):
     num_rounds = len(result_sequence)
     
     infl_counter = 0
-    sat_counter_v = 0
-    sat_counter_u = 0
     for t in range(num_rounds):
+        sat_counter_v = 0
+        sat_counter_u = 0
         if sat_matrix[t][voter_index] == 1:
             sat_counter_v += 1
         for u_ind, _ in enumerate(profile_sequence[t]):
