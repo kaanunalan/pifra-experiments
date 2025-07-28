@@ -110,7 +110,7 @@ if __name__ == "__main__":
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
-        for (spf, update_func, init, threshold), lower_quota, gini, footrule, kt, std_kt, egalitarian_kt, lq_ratio_special_voter, avg_sq_kt in zip(
+        for (spf, update_func, init, threshold), lower_quota, gini, footrule, kt, std_kt, egalitarian_kt, total_sats_special_voter, avg_sq_kt in zip(
             product(spf_list, update_functions, initializations, thresholds),
             lower_quota_values, gini_values, avg_footrule_values,
             avg_kt_values, std_kt_values, egalitarian_kt_values,
