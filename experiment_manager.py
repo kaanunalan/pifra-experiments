@@ -1,7 +1,7 @@
 from itertools import product
 from data_generator import generate_profile_sequence_list
 from tspf_runner import run_tspf
-from result_processor import get_avg_kt_distance, get_avg_spearman_footrule_distance, get_avg_sq_kt_distance, get_egalitarian_kt_distance, get_gini_influence_coefficient, get_perpetual_lower_quota_compliance, get_perpetual_lower_quota_compliance_ratio_special_voter, get_standard_deviation_kt
+from result_processor import get_avg_kt_distance, get_avg_spearman_footrule_distance, get_avg_sq_kt_distance, get_egalitarian_kt_distance, get_gini_influence_coefficient, get_perpetual_lower_quota_compliance, get_perpetual_lower_quota_compliance_ratio_special_voter, get_standard_deviation_kt, get_total_satisfaction_special_voter
 from visualizer import visualize_all
 import csv
 
@@ -25,7 +25,7 @@ def start_experiment(spf, update_function, initialization, threshold, profile_se
     sum_avg_kt = 0
     sum_std_kt = 0
     sum_egalitarian_kt = 0    
-    sum_lq_ratio_special_voter = 0
+    sum_total_sat = 0
     sum_avg_sq_kt = 0
     for results, sat_matrix, support_matrix, profile_sequence in zip(all_results, all_satisfaction, all_support, profile_sequence_list):
         sum_lower_quota += get_perpetual_lower_quota_compliance(satisfaction_matrix, support_matrix)
@@ -34,7 +34,7 @@ def start_experiment(spf, update_function, initialization, threshold, profile_se
         sum_avg_kt += get_avg_kt_distance(profile_sequence, results)
         sum_std_kt += get_standard_deviation_kt(profile_sequence, results)
         sum_egalitarian_kt += get_egalitarian_kt_distance(profile_sequence, results)
-        sum_lq_ratio_special_voter += get_perpetual_lower_quota_compliance_ratio_special_voter(satisfaction_matrix, support_matrix)
+        sum_total_sat += get_total_satisfaction_special_voter(satisfaction_matrix, support_matrix)
         sum_avg_sq_kt += get_avg_sq_kt_distance(profile_sequence, results)
     avg_lower_quota = sum_lower_quota / len(profile_sequence_list)
     avg_gini = sum_gini / len(profile_sequence_list)
@@ -42,7 +42,7 @@ def start_experiment(spf, update_function, initialization, threshold, profile_se
     avg_kt = sum_avg_kt / len(profile_sequence_list)
     std_kt = sum_std_kt / len(profile_sequence_list)
     egalitarian_kt = sum_egalitarian_kt / len(profile_sequence_list)
-    lq_ratio_special_voter = sum_lq_ratio_special_voter / len(profile_sequence_list)
+    avg_total_sat = sum_total_sat / len(profile_sequence_list)
     avg_sq_kt = sum_avg_sq_kt / len(profile_sequence_list)
     return (
     (spf, update_function, initialization, threshold, avg_lower_quota),
@@ -51,7 +51,7 @@ def start_experiment(spf, update_function, initialization, threshold, profile_se
     (spf, update_function, initialization, threshold, avg_kt),
     (spf, update_function, initialization, threshold, std_kt),
     (spf, update_function, initialization, threshold, egalitarian_kt),
-    (spf, update_function, initialization, threshold, lq_ratio_special_voter),
+    (spf, update_function, initialization, threshold, avg_total_sat),
     (spf, update_function, initialization, threshold, avg_sq_kt)
     )
 
@@ -81,24 +81,24 @@ if __name__ == "__main__":
     avg_kt_values = []
     std_kt_values = []
     egalitarian_kt_values = []
-    lower_quota_ratios_special_voter = []
+    total_sats_special_voter = []
     avg_sq_kt_values = []
     for spf, update_func, init, threshold in product(spf_list, update_functions, initializations, thresholds):
         print(f"Running experiment with SPF: {spf}, Update Function: {update_func}, Initialization: {init}, Threshold: {threshold}")
-        avg_lower_quota, avg_gini, avg_footrule, avg_kt, std_kt, egalitarian_kt, lq_ratio_special_voter, avg_sq_kt = start_experiment(spf, update_func, init, threshold, profile_sequence_list)
+        avg_lower_quota, avg_gini, avg_footrule, avg_kt, std_kt, egalitarian_kt, total_sat, avg_sq_kt = start_experiment(spf, update_func, init, threshold, profile_sequence_list)
         lower_quota_values.append(avg_lower_quota)
         gini_values.append(avg_gini)
         avg_footrule_values.append(avg_footrule)
         avg_kt_values.append(avg_kt)
         std_kt_values.append(std_kt)
         egalitarian_kt_values.append(egalitarian_kt)
-        lower_quota_ratios_special_voter.append(lq_ratio_special_voter)
+        total_sats_special_voter.append(total_sat)
         avg_sq_kt_values.append(avg_sq_kt)
 
     visualize_all(
         spf_list, update_functions, lower_quota_values, gini_values,
         avg_footrule_values, avg_kt_values, std_kt_values, egalitarian_kt_values, 
-        lower_quota_ratios_special_voter, avg_sq_kt_values
+        total_sats_special_voter, avg_sq_kt_values
     )
 
     # Save results to a csv file for each metric
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         fieldnames = ["SPF", "Update Function", "Initialization", "Threshold",
                       "Avg Lower Quota", "Avg Gini", "Avg Footrule",
                       "Avg KT", "Std KT", "Egalitarian KT",
-                      "LQ Ratio Special Voter", "Avg SQ KT"]
+                      "Total Number of Satisfaction Special Voter", "Avg SQ KT"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             product(spf_list, update_functions, initializations, thresholds),
             lower_quota_values, gini_values, avg_footrule_values,
             avg_kt_values, std_kt_values, egalitarian_kt_values,
-            lower_quota_ratios_special_voter, avg_sq_kt_values
+            total_sats_special_voter, avg_sq_kt_values
         ):
             writer.writerow({
                 'SPF': spf,
@@ -127,7 +127,7 @@ if __name__ == "__main__":
                 'Avg KT': kt,
                 'Std KT': std_kt,
                 'Egalitarian KT': egalitarian_kt,
-                'LQ Ratio Special Voter': lq_ratio_special_voter,
+                'Total Number of Satisfaction Special Voter': total_sats_special_voter,
                 'Avg SQ KT': avg_sq_kt
             })
     

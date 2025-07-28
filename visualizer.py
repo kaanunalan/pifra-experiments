@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def visualize_all(spf_list, update_functions, lower_quota_values, gini_values, avg_footrule_values, avg_kt_values, std_kt_values, egalitarian_kt_values, lower_quota_ratios_special_voter, avg_sq_kt_values):
+def visualize_all(spf_list, update_functions, lower_quota_values, gini_values, avg_footrule_values, avg_kt_values, std_kt_values, egalitarian_kt_values, total_sats_special_voter, avg_sq_kt_values):
     draw_perpetual_lower_quota_compliance_all(lower_quota_values, spf_list, update_functions, "equal", 0, "plots/lower_quota_plot_1.png")
     draw_perpetual_lower_quota_compliance_all(lower_quota_values, spf_list, update_functions, "equal", 3, "plots/lower_quota_plot_2.png")
     draw_perpetual_lower_quota_compliance_all(lower_quota_values, spf_list, update_functions, "equal", 7, "plots/lower_quota_plot_3.png")
@@ -49,13 +49,13 @@ def visualize_all(spf_list, update_functions, lower_quota_values, gini_values, a
     draw_egalitarian_kt_all(egalitarian_kt_values, spf_list, update_functions, "special-voter-25-percent", 3, "plots/egalitarian_kt_plot_2_25.png")
     draw_egalitarian_kt_all(egalitarian_kt_values, spf_list, update_functions, "special-voter-25-percent", 7, "plots/egalitarian_kt_plot_3_25.png")
     
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "equal", 0, "plots/perpetual_lower_quota_ratio_1.png")
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "equal", 3, "plots/perpetual_lower_quota_ratio_2.png")
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "equal", 7, "plots/perpetual_lower_quota_ratio_3.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "equal", 0, "plots/total_sat_1.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "equal", 3, "plots/total_sat_2.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "equal", 7, "plots/total_sat_3.png")
 
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "special-voter-25-percent", 0, "plots/perpetual_lower_quota_ratio_1_25.png")
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "special-voter-25-percent", 3, "plots/perpetual_lower_quota_ratio_2_25.png")
-    draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, "special-voter-25-percent", 7, "plots/perpetual_lower_quota_ratio_3_25.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "special-voter-25-percent", 0, "plots/total_sat_1_25.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "special-voter-25-percent", 3, "plots/total_sat_2_25.png")
+    draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, "special-voter-25-percent", 7, "plots/total_sat_3_25.png")
 
     draw_average_sq_kt_all(avg_sq_kt_values, spf_list, update_functions, "equal", 0, "plots/avg_sq_kt_plot_1.png")
     draw_average_sq_kt_all(avg_sq_kt_values, spf_list, update_functions, "equal", 3, "plots/avg_sq_kt_plot_2.png")
@@ -94,7 +94,7 @@ def draw_metric_all(metric_values, spf_list, update_functions, init_to_plot, thr
     # Plot
     plt.figure(figsize=(10, 6))
     for spf in spf_list:
-        plt.scatter(update_functions, plot_data[spf], marker='o', label=spf)
+        plt.scatter(update_functions, plot_data[spf], marker='o', label=spf, alpha=0.5)
     plt.title(f"{metric_name} (init={init_to_plot}, threshold={threshold_to_plot})")
     plt.xlabel("Update Function")
     plt.ylabel(metric_name)
@@ -154,8 +154,15 @@ def draw_egalitarian_kt_all(egalitarian_kt_values, spf_list, update_functions, i
 def draw_perpetual_lower_quota_ratio_all(lower_quota_ratios_special_voter, spf_list, update_functions, init_to_plot, threshold_to_plot, file_name):
     draw_metric_all(
         lower_quota_ratios_special_voter, spf_list, update_functions, init_to_plot, threshold_to_plot,
+        file_name, metric_name="Perpetual Lower Quota Compliance Ratio Special Voter"
+    )
+
+def draw_total_satisfaction_all(total_sats_special_voter, spf_list, update_functions, init_to_plot, threshold_to_plot, file_name):
+    draw_metric_all(
+        total_sats_special_voter, spf_list, update_functions, init_to_plot, threshold_to_plot,
         file_name, metric_name="Number of Satisfaction Special Voter"
     )
+
 
 def draw_average_sq_kt_all(avg_sq_kt_values, spf_list, update_functions, init_to_plot, threshold_to_plot, file_name):
     draw_metric_all(
